@@ -21,14 +21,17 @@ public class PostService {
     public List<PostSummaryResponse> getPostSummaries() {
         List<Post> posts = postRepository.findAll();
         List<PostSummaryResponse> responses = new ArrayList<>();
+
         for (Post post : posts) {
             PostSummaryResponse response = new PostSummaryResponse(
                     post.getId(),
                     post.getTitle(),
                     post.getCreatedAt()
             );
+
             responses.add(response);
         }
+
         return responses;
     }
 }
