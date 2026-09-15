@@ -7,9 +7,14 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "posts")
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Post {
 
     @Id
@@ -25,23 +30,14 @@ public class Post {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    // JPA가 DB의 row를 Post 객체로 만들 때 사용하는 매개변수 없는 생성자
-    protected Post() {
+    public Post(String title, String content) {
+        this.title = title;
+        this.content = content;
+        this.createdAt = LocalDateTime.now();
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
+    public void update(String title, String content) {
+        this.title = title;
+        this.content = content;
     }
 }

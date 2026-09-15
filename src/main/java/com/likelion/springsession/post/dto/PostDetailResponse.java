@@ -4,14 +4,12 @@ import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-// 게시글 목록 화면에 필요한 데이터만 담는 Response DTO
-// Post Entity에서 content 제외
 @Getter
 @RequiredArgsConstructor
-public class PostSummaryResponse {
+public class PostDetailResponse {
 
     private final Long id;
     private final String title;
+    private final String content;
     private final LocalDateTime createdAt;
-
 }
