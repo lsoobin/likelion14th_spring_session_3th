@@ -1,83 +1,111 @@
-# 3주차 전반부 실습 강의 대본
+# 3주차 전반부 강의 대본 — 원본 강의자료 순서 기준
 
-담당 범위: Part 0~4, 전반부 정리, 후반부 연결
-예상 총 소요: 약 95분(환경 문제 대응 시간 10분 포함)
+## 대본 사용 기준
 
-> 화면 공유 전에 IntelliJ에서 저장소 루트 `likelion14th_spring_session_3th`를 열고, MySQL과 Postman을 준비한다. 경로는 모두 프로젝트 루트 기준이다.
+- 기준 자료: 사용자가 제공한 `0916_JPA와 Lombok으로 게시글 CRUD API 완성하기` 1,616줄
+- 담당 범위: 원문 21~890줄
+- 줄 번호는 첨부된 `pasted-text.txt`의 줄 번호다.
+- 사진 번호는 이번에 추가로 전달받은 `사진 1.jpg`~`사진 10.jpg`다.
+- 목표는 원본 강의자료의 흐름을 유지하면서 화면 공유 중 그대로 읽고 실습하는 것이다.
+- 예상 시간: 약 90분
 
-## 강의 전 체크
+## 전반부에서 반드시 고칠 자료 1개
 
-- JDK 17 선택
-- Gradle JVM도 JDK 17
-- MySQL 실행
-- `likelion_blog` DB와 `likelion` 사용자 준비
-- Run Configuration의 `DB_PASSWORD` 설정
-- `import.sql` 제거
-- Postman의 Content-Type이 application/json
-- 강사용 최종 브랜치가 아니라 2주차 시작 상태에서 실습할 경우, 별도 복사본이나 커밋을 준비
+### 자료 위치
+
+- Part 0, 「DB 비밀번호 설정 변경」: 원문 88~137줄
+- 사진 2: IntelliJ Environment variables 입력 화면
+
+### 고칠 내용
+
+사진 2의 고정 값:
+
+```text
+DB_PASSWORD=<사진 속 고정 비밀번호>
+```
+
+다음처럼 바꾼다.
+
+```text
+DB_PASSWORD=본인의 MySQL 비밀번호
+```
+
+### 반드시 고치는 이유
+
+2주차에 각자 설정한 MySQL 비밀번호와 사진 속 값이 다르면 애플리케이션이 `Access denied`로 실행되지 않는다. 특정 비밀번호를 정답처럼 보여주지 말고, 각자 만든 비밀번호를 넣도록 안내해야 한다.
+
+이 항목을 제외하면 사진 1~10의 전반부 코드는 정상적인 CREATE/READ 실습을 막는 컴파일 오류가 없다.
+
+---
+
+# 오프닝
+
+예상 소요: 2분
+
+### 자료 위치
+
+- 「오늘의 진행 순서」: 원문 14~20줄
+- 「3주차 전반부 학습 목표」: 원문 21~30줄
+
+### 내가 말할 문장
+
+“오늘은 지난 시간에 만든 게시글 코드를 그대로 이어서 사용합니다. 전반부에서는 Lombok으로 반복 코드를 줄이고, JpaRepository의 `save()`, `findAll()`, `findById()`를 이용해서 게시글 생성과 조회를 완성할 거예요.”
+
+“후반부에서는 지금 조회한 Entity를 수정하는 원리를 배우고 PUT과 DELETE까지 이어갑니다. 우선 전반부에서는 POST와 GET이 실제로 동작하는 데 집중하겠습니다.”
 
 ---
 
 # Part 0. 지난 코드 이어서 사용하기
 
-예상 소요: 12분
+예상 소요: 10분
 
-## 화면과 클릭
+## 0-1. 기존 프로젝트 열기
+
+### 자료 위치
+
+- Part 0 시작: 원문 31줄
+- 「기존 프로젝트 열기」: 원문 33~55줄
+- 「오늘 전반부에서 바뀌는 부분」: 원문 56~83줄
+
+### IntelliJ 화면 조작
 
 1. IntelliJ 시작 화면에서 Open을 누른다.
 2. `spring_session_3/likelion14th_spring_session_3th` 폴더를 선택한다.
-3. 왼쪽 Project 창에서 `build.gradle`이 최상단에 보이는지 확인한다.
-4. `src/main/java/com/likelion/springsession/post`를 펼친다.
-5. `src/main/resources/application.yaml`을 연다.
+3. 프로젝트 왼쪽에서 `src/main/java/com/likelion/springsession/post`를 펼친다.
+4. controller, dto, entity, repository, service가 있는지 확인한다.
 
-## 내가 말할 문장
+### 내가 말할 문장
 
-“오늘은 새 프로젝트를 만들지 않고 2주차 코드를 그대로 이어갑니다. 지금 왼쪽에 controller, dto, entity, repository, service가 보이죠. 지난 시간에는 DB의 게시글을 목록 DTO로 바꾸는 흐름까지 만들었고, 오늘은 그 위에 생성과 상세 조회를 붙일 거예요.”
+“새 프로젝트는 만들지 않습니다. 1~2주차에 쓰던 프로젝트를 그대로 열어주세요.”
 
-“프로젝트 루트는 build.gradle과 gradlew가 보이는 이 폴더입니다. 상위의 spring_session_3 폴더만 열면 Gradle 프로젝트를 바로 인식하지 못할 수 있으니 꼭 이 위치를 확인해 주세요.”
+“프로젝트 루트는 `build.gradle`, `gradlew`, `src`가 바로 보이는 `likelion14th_spring_session_3th` 폴더입니다. 그 위 폴더를 잘못 열면 Gradle 프로젝트 인식이 안 될 수 있어요.”
 
-## 2주차에서 확인할 파일
+“지난 시간에는 `Post`, `PostRepository`, `PostService`, 목록용 `PostSummaryResponse`, 그리고 목록 Controller까지 만들었습니다. 오늘은 이 구조를 바꾸지 않고 코드를 추가합니다.”
 
-```text
-src/main/java/com/likelion/springsession/post/
-├── controller/PostController.java
-├── dto/PostSummaryResponse.java
-├── entity/Post.java
-├── repository/PostRepository.java
-└── service/PostService.java
-```
+### 멘티 질문
 
-“흐름을 한 번만 읽고 갈게요. HTTP 요청은 Controller가 받고, Service가 작업 순서를 정하고, Repository가 JPA를 통해 DB와 대화합니다. Entity는 posts 테이블과 연결되고, DTO는 요청과 응답 모양을 담당합니다.”
+“요청을 가장 먼저 받는 계층은 Controller, Service, Repository 중 어디일까요?”
 
-## application.yaml 변경
+정답: Controller
 
-파일: `src/main/resources/application.yaml`
+### 다음 내용 연결
 
-기존:
+“코드를 수정하기 전에 오늘 만든 게시글이 앱을 재실행해도 남도록 DB 설정부터 확인하겠습니다.”
 
-```yaml
-password: <기존 평문 비밀번호>
-```
+## 0-2. application.yaml과 환경변수
 
-변경:
+### 자료 위치
 
-```yaml
-password: ${DB_PASSWORD}
-```
+- 「application.yaml 확인」: 원문 84~87줄
+- 「DB 비밀번호 설정 변경」: 원문 88~143줄
+- 사진 1: `${DB_PASSWORD}`, `ddl-auto:update`
+- 사진 2: IntelliJ Edit Configurations
 
-기존:
+### IntelliJ 이동
 
-```yaml
-ddl-auto: create
-```
+`src/main/resources/application.yaml`을 연다.
 
-변경:
-
-```yaml
-ddl-auto: update
-```
-
-최종 확인:
+### 변경할 코드
 
 ```yaml
 spring:
@@ -96,113 +124,119 @@ spring:
         format_sql: true
 ```
 
-“비밀번호는 Git에 올라가면 안 되기 때문에 환경변수로 뺍니다. 중괄호 안의 DB_PASSWORD는 비밀번호 자체가 아니라 환경변수 이름이에요.”
+### 내가 말할 문장
 
-“create는 앱을 켤 때 스키마를 다시 만들 수 있어서 기존 데이터가 사라질 수 있습니다. 오늘은 POST로 만든 데이터를 이어서 조회해야 하니 로컬 실습에서는 update를 씁니다. 다만 update가 운영 배포의 정답이라는 뜻은 아닙니다. 운영에서는 변경 이력을 명시적으로 관리하는 마이그레이션 도구를 사용합니다.”
+“비밀번호를 Java 코드나 YAML에 직접 적지 않고 `DB_PASSWORD`라는 환경변수에서 읽도록 바꾸겠습니다. 중괄호 안은 실제 비밀번호가 아니라 환경변수 이름입니다.”
 
-## IntelliJ 환경변수
+“`ddl-auto:create`는 애플리케이션을 실행할 때 스키마를 다시 만들 수 있습니다. 오늘은 POST로 만든 데이터를 이어서 조회해야 하므로 로컬 실습에서는 `update`로 바꿉니다.”
 
-클릭:
+“사진 1의 설명처럼 `update`는 오늘 로컬 실습을 위한 설정입니다. 실제 운영 환경에서는 별도의 DB 마이그레이션 방식을 사용합니다.”
 
-1. 상단 실행 구성 드롭다운
+### IntelliJ 환경변수 입력
+
+1. 상단 실행 구성 이름 클릭
 2. Edit Configurations
-3. `SpringsessionApplication`
-4. Modify options → Operating System → Environment variables
-5. `DB_PASSWORD=자신의 MySQL 비밀번호`
+3. `SpringsessionApplication` 선택
+4. Environment variables 입력
+5. `DB_PASSWORD=본인의 MySQL 비밀번호`
 6. Apply → OK
 
-“환경변수는 실행 프로세스가 시작될 때 읽습니다. 값을 바꿨다면 실행 중인 앱을 완전히 멈추고 다시 켜야 합니다.”
+### 이때 반드시 말할 문장
 
-## import.sql 제거
+“사진에는 예시 비밀번호가 보이지만 그 값을 그대로 복사하지 마세요. 2주차에 본인이 MySQL 계정에 설정한 비밀번호를 넣어야 합니다.”
 
-파일: `src/main/resources/import.sql`
+“환경변수는 실행할 때 읽기 때문에 값을 추가한 다음 실행 중인 애플리케이션을 완전히 종료하고 다시 실행해야 합니다.”
 
-“2주차에는 시작 데이터를 자동으로 넣기 위해 import.sql을 썼습니다. 오늘은 우리가 POST 요청으로 직접 만들 거라 이 파일은 삭제하겠습니다. Git 파일이라 실수해도 버전 관리에서 복구할 수 있습니다.”
+### import.sql
 
-삭제할 기존 내용:
+Project 창에서 `src/main/resources/import.sql`이 남아 있다면 삭제한다.
 
-```sql
-INSERT INTO posts (title, content, created_at) VALUES (...);
-INSERT INTO posts (title, content, created_at) VALUES (...);
+“2주차에는 예제 데이터를 자동으로 넣었지만 오늘은 POST 요청으로 직접 게시글을 생성할 겁니다. 예상하지 않은 글이 생기지 않도록 `import.sql`은 삭제합니다.”
+
+### 실행 확인
+
+애플리케이션을 한 번 실행한다.
+
+정상 기준:
+
+```text
+Started SpringsessionApplication
 ```
 
-## 실행 시점
+### 현장 오류 대응
 
-여기서는 코드를 바꾸기 전 환경만 확인한다. 애플리케이션을 한 번 실행해 DB 연결을 확인하고 종료한다.
+#### DB_PASSWORD가 없을 때
 
-내 멘트:
-
-“오른쪽 위 실행 버튼을 눌러서 started 로그가 나오는지 보겠습니다. 실패하면 코드 작성 전에 DB 문제부터 분리할 수 있어요.”
-
-## 빈칸 질문
-
-“비밀번호 자리에 직접 값 대신 `${_____}`를 적었습니다. 환경변수 이름은 뭘까요?”
-정답: `DB_PASSWORD`
-
-“앱을 켤 때마다 테이블을 새로 만들 수 있는 설정은 create일까요, update일까요?”
-정답: `create`
-
-## 자주 나는 오류와 확인 순서
-
-### DB_PASSWORD가 설정되지 않음
-
-현장 멘트:
-
-“로그에서 DB_PASSWORD 또는 placeholder라는 단어를 찾아볼게요. 환경변수 이름의 철자와 대소문자를 확인하고, Run Configuration에 넣은 뒤 앱을 완전히 재시작합니다.”
+“로그에 `DB_PASSWORD`, `Access denied`, DataSource 관련 메시지가 보이면 Run Configuration의 환경변수부터 확인하겠습니다.”
 
 확인 순서:
 
-1. `application.yaml`이 정확히 `${DB_PASSWORD}`인지
-2. 현재 실행 중인 Run Configuration이 맞는지
-3. Environment variables에 이름과 값이 있는지
-4. 실행 프로세스를 종료하고 재실행했는지
+1. YAML이 `${DB_PASSWORD}`인지
+2. 실행 중인 Run Configuration이 맞는지
+3. 환경변수 이름의 대소문자가 정확한지
+4. 값을 넣은 뒤 앱을 재시작했는지
 
-### MySQL Access denied
+#### Access denied
 
-현장 멘트:
-
-“Access denied는 MySQL 서버까지는 도착했지만 로그인이 거절됐다는 뜻입니다. DB가 꺼진 문제와 구분해서 username, 비밀번호, 계정 권한을 보겠습니다.”
+“Access denied는 MySQL 서버에는 도착했지만 로그인이 실패한 상태입니다. username과 본인의 실제 비밀번호를 확인할게요.”
 
 확인 순서:
 
 1. `username: likelion`
-2. `DB_PASSWORD` 실제 값
-3. MySQL에서 해당 계정으로 직접 로그인
-4. `'likelion'@'localhost'` 권한
-5. 비밀번호 변경 후 Run Configuration도 같이 바꿨는지
+2. 2주차에서 설정한 MySQL 비밀번호
+3. Environment variables 값
+4. MySQL 계정 권한
 
-### DB가 실행되지 않음
+#### DB가 꺼졌을 때
 
-현장 멘트:
+“Connection refused 또는 Communications link failure라면 비밀번호보다 먼저 MySQL이 실행 중인지, 3306 포트를 쓰는지 확인합니다.”
 
-“Connection refused나 Communications link failure면 로그인 전 단계입니다. MySQL 서비스가 켜져 있는지와 3306 포트를 먼저 확인할게요.”
+#### import.sql 데이터가 보일 때
 
-확인 순서:
+“파일을 지금 삭제해도 전에 DB에 들어간 행은 남아 있을 수 있습니다. `import.sql`이 현재 존재하는지와 기존 DB 데이터를 구분해서 보겠습니다.”
 
-1. MySQL 서비스/컨테이너 실행
-2. 포트 3306
-3. DB 이름 `likelion_blog`
-4. datasource URL 오타
+### 멘티 질문
 
-### import.sql 때문에 데이터가 생김
+“앱을 실행할 때마다 테이블을 다시 만들 수 있는 설정은 `create`와 `update` 중 무엇일까요?”
 
-“우리가 POST하지 않았는데 행이 보이면 현재 프로젝트에 import.sql이 남아 있는지 검색합니다. 파일을 지워도 이미 DB에 들어간 행은 자동으로 없어지지 않으니, 기존 행인지도 구분해야 해요.”
+정답: `create`
 
-## 다음 단계 연결 멘트
+### 다음 내용 연결
 
-“DB와 2주차 코드가 준비됐습니다. 이제 기능을 더하기 전에 Getter와 생성자처럼 반복되는 코드를 Lombok으로 정리해볼게요.”
+“실행 환경이 준비됐으니 이제 기존 Getter와 생성자 코드를 Lombok으로 줄여보겠습니다.”
 
 ---
 
-# Part 1. Lombok 적용
+# Part 1. Lombok 적용하기
 
 예상 소요: 22분
 
-## 1-1. build.gradle
+## 1-1. Lombok 소개
 
-클릭: 프로젝트 루트 → `build.gradle` → `dependencies` 블록
+### 자료 위치
 
-추가:
+- Part 1 시작: 원문 144줄
+- 「Lombok」: 원문 146~165줄
+- 「왜 Lombok을 사용할까요?」: 원문 166~210줄
+
+### 내가 말할 문장
+
+“기존에는 Getter와 생성자를 직접 작성했습니다. 이 코드는 필요하지만 필드가 많아질수록 반복이 커집니다. Lombok은 이런 반복 코드를 어노테이션으로 생성해줍니다.”
+
+“Lombok이 비즈니스 기능까지 대신 만드는 건 아닙니다. 뒤에서 작성할 게시글 생성자처럼 의미가 있는 코드는 직접 작성합니다.”
+
+## 1-2. 의존성 추가와 Gradle Reload
+
+### 자료 위치
+
+- 「의존성 추가」: 원문 211~238줄
+- 「오늘 사용할 Lombok」: 원문 239~249줄
+
+### IntelliJ 이동
+
+프로젝트 루트의 `build.gradle` → `dependencies` 블록
+
+### 추가할 코드
 
 ```groovy
 implementation 'org.springframework.boot:spring-boot-starter-validation'
@@ -214,23 +248,43 @@ testCompileOnly 'org.projectlombok:lombok'
 testAnnotationProcessor 'org.projectlombok:lombok'
 ```
 
-내가 말할 문장:
+### 내가 말할 문장
 
-“Validation은 요청값을 검사하는 기능이고 Lombok은 반복되는 Java 코드를 컴파일할 때 만들어주는 도구입니다. 역할이 다르기 때문에 의존성도 따로 추가합니다.”
+“Validation 의존성은 `@NotBlank`, `@Size`, `@Valid`를 쓰기 위해 추가합니다. Lombok은 Getter와 생성자 같은 반복 코드를 만들기 위해 추가합니다.”
 
-“compileOnly는 실행 결과물에 Lombok 자체를 넣지 않고 컴파일할 때만 쓰겠다는 뜻이고, annotationProcessor는 Lombok 어노테이션을 실제 코드로 처리하게 합니다.”
+“저장한 다음 오른쪽 Gradle 탭의 Reload 버튼을 꼭 눌러주세요. 의존성 파일을 수정했지만 Reload하지 않으면 Lombok import가 빨갛게 보일 수 있습니다.”
 
-## Gradle Reload
+### Lombok 빨간색 대응
 
-클릭: IntelliJ 오른쪽 Gradle 탭 → Reload All Gradle Projects
+확인 순서:
 
-“이 단계는 저장만 해서는 부족할 수 있습니다. Gradle Reload가 끝난 뒤 External Libraries에 Lombok이 들어왔는지 확인하고 다음으로 넘어갈게요.”
+1. 의존성을 `dependencies` 블록 안에 적었는지
+2. Gradle Reload를 눌렀는지
+3. Project SDK와 Gradle JVM이 Java 17인지
+4. Settings → Compiler → Annotation Processors → Enable annotation processing
+5. Build → Rebuild Project
 
-## 1-2. Post Entity
+말할 문장:
 
-경로: `src/main/java/com/likelion/springsession/post/entity/Post.java`
+“IDE의 빨간 줄과 실제 Gradle 컴파일 결과가 다를 수 있습니다. 마지막 판단은 Gradle Build 결과로 하겠습니다.”
 
-추가 import:
+## 1-3. Post Entity에 Lombok 적용
+
+### 자료 위치
+
+- 「Post Entity 수정」: 원문 250~278줄
+- 사진 3
+
+### IntelliJ 이동
+
+`src/main/java/com/likelion/springsession/post/entity/Post.java`
+
+### 삭제할 코드
+
+- 직접 작성한 protected 기본 생성자
+- `getId()`, `getTitle()`, `getContent()`, `getCreatedAt()`
+
+### 추가 import
 
 ```java
 import lombok.AccessLevel;
@@ -238,26 +292,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 ```
 
-클래스 위에 추가:
+### 클래스 위에 추가
 
 ```java
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 ```
 
-삭제:
-
-```java
-protected Post() {
-}
-
-public Long getId() { ... }
-public String getTitle() { ... }
-public String getContent() { ... }
-public LocalDateTime getCreatedAt() { ... }
-```
-
-이 시점의 전체 코드:
+### 사진 3 기준 이 시점의 전체 코드
 
 ```java
 package com.likelion.springsession.post.entity;
@@ -273,10 +315,10 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Entity
-@Table(name = "posts")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Entity
+@Table(name = "posts")
 public class Post {
 
     @Id
@@ -294,31 +336,30 @@ public class Post {
 }
 ```
 
-내 멘트:
+### 내가 말할 문장
 
-“JPA Entity에는 public 또는 protected 기본 생성자가 필요합니다. 우리는 일반 코드에서 막 만들지 못하도록 protected를 선택합니다. Getter는 읽기만 열고, Entity 전체 Setter는 열지 않을게요. 후반부에서 게시글 수정이라는 의미가 드러나는 메서드를 따로 만듭니다.”
+“`@Getter`가 기존 Getter를 대신합니다. `@NoArgsConstructor`는 매개변수 없는 생성자를 만들고, protected로 제한해 JPA는 사용할 수 있지만 일반 코드에서 함부로 부르기는 어렵게 합니다.”
 
-“2주차와 동작은 같고 직접 쓴 반복 코드만 Lombok이 대신합니다.”
+“Entity에는 `@Setter`를 붙이지 않습니다. 후반부에서 게시글을 수정한다는 의미가 드러나는 메서드를 따로 추가할 예정입니다.”
 
-## 1-3. 목록 Response DTO
+### 멘티 질문
+
+“Entity의 기본 생성자 접근 범위를 protected로 만드는 값은 `AccessLevel._____`입니다.”
+
+정답: `PROTECTED`
+
+## 1-4. Response DTO에 Lombok 적용
+
+### 자료 위치
+
+- 「기존 PostSummaryResponse 수정」: 원문 279~288줄
+- 사진 4
+- 「새로운 PostDetailResponse 만들기」: 원문 289~302줄
+- 사진 5
+
+### PostSummaryResponse
 
 경로: `src/main/java/com/likelion/springsession/post/dto/PostSummaryResponse.java`
-
-추가 import:
-
-```java
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-```
-
-추가 어노테이션:
-
-```java
-@Getter
-@RequiredArgsConstructor
-```
-
-직접 쓴 생성자와 Getter를 삭제한 전체 코드:
 
 ```java
 package com.likelion.springsession.post.dto;
@@ -337,15 +378,9 @@ public class PostSummaryResponse {
 }
 ```
 
-“RequiredArgsConstructor는 이번 클래스의 초기화되지 않은 final 필드를 모두 받는 생성자를 만듭니다. final을 빼면 우리가 원하는 생성자가 만들어지지 않는다는 점을 기억해 주세요.”
-
-## 1-4. 상세 Response DTO
-
-클릭: `post/dto` 우클릭 → New → Java Class → `PostDetailResponse`
+### PostDetailResponse
 
 경로: `src/main/java/com/likelion/springsession/post/dto/PostDetailResponse.java`
-
-전체 코드:
 
 ```java
 package com.likelion.springsession.post.dto;
@@ -365,87 +400,67 @@ public class PostDetailResponse {
 }
 ```
 
-“목록은 빠르게 훑는 화면이라 본문을 빼고, 상세는 본문까지 포함합니다. Entity를 그대로 반환하지 않고 API 목적에 맞는 DTO를 나누는 예시입니다.”
+### 내가 말할 문장
 
-## 1-5. PostService
+“목록용 DTO에는 본문이 없고 상세 DTO에는 `content`가 있습니다. 같은 Entity라도 API 목적에 따라 필요한 응답 모양이 다르기 때문입니다.”
 
-경로: `src/main/java/com/likelion/springsession/post/service/PostService.java`
+“`@RequiredArgsConstructor`가 이번 DTO의 final 필드를 모두 받는 생성자를 만들어줍니다. final을 빠뜨리면 우리가 기대한 생성자가 생기지 않으니 확인해 주세요.”
 
-추가 import:
+## 1-5. PostService에 Lombok 적용
+
+### 자료 위치
+
+- 「PostService에도 Lombok 적용」: 원문 303~337줄
+- 「클래스마다 사용하는 Lombok이 다릅니다」: 원문 338~367줄
+
+### 변경
+
+`PostService.java`에서 직접 작성한 생성자를 삭제하고 다음을 추가한다.
 
 ```java
 import lombok.RequiredArgsConstructor;
 ```
 
-클래스 위:
-
 ```java
 @Service
 @RequiredArgsConstructor
-```
+public class PostService {
 
-삭제:
-
-```java
-public PostService(PostRepository postRepository) {
-    this.postRepository = postRepository;
+    private final PostRepository postRepository;
 }
 ```
 
-“생성자 주입을 없앤 게 아닙니다. final 필드를 받는 같은 생성자를 Lombok이 만들어줍니다.”
+### 내가 말할 문장
 
-## 빈칸 질문
+“생성자 주입 방식을 없앤 것이 아닙니다. `postRepository`가 final이기 때문에 Lombok이 기존과 같은 생성자를 만들어줍니다.”
 
-“JPA용 protected 기본 생성자를 만드는 어노테이션은 `@NoArgsConstructor(access = AccessLevel._____)`입니다.”
-정답: `PROTECTED`
+“사진 10의 Controller는 기존 직접 생성자를 그대로 사용합니다. 오늘 자료에서 Lombok으로 바꾸는 Service와 구분해 주세요.”
 
-“RequiredArgsConstructor가 이번 코드에서 생성자 매개변수로 삼는 필드의 키워드는?”
-정답: `final`
+### DTO 생성자 오류 대응
 
-## Lombok 현장 대응
+“`new PostSummaryResponse(...)`에서 생성자를 찾을 수 없다고 나오면 DTO 필드가 final인지, `@RequiredArgsConstructor`가 붙었는지, Gradle Reload가 됐는지 순서로 확인합니다.”
 
-### import가 빨간색
+### 다음 내용 연결
 
-현장 멘트:
-
-“빨간색이면 어노테이션을 지우기 전에 Gradle이 의존성을 받았는지부터 확인합니다.”
-
-순서:
-
-1. `build.gradle`의 의존성이 `dependencies` 안인지
-2. 오타와 따옴표 확인
-3. Gradle Reload
-4. Gradle 창의 Dependencies 또는 External Libraries 확인
-5. Project SDK/Gradle JVM이 17인지
-6. IntelliJ Lombok 플러그인 상태
-7. Settings → Build, Execution, Deployment → Compiler → Annotation Processors → Enable annotation processing
-8. Build → Rebuild Project
-
-### Reload를 하지 않음
-
-“코드는 맞는데 import가 안 잡히면 오른쪽 Gradle의 새로고침 아이콘을 눌렀는지 먼저 물어볼게요. IDE가 새 의존성을 아직 모르는 상태일 수 있습니다.”
-
-### annotation processing 문제
-
-“Gradle 빌드는 성공하는데 IDE만 빨갛거나, 반대로 IDE는 괜찮은데 컴파일에서 Getter가 없다고 하면 annotation processor 설정과 Gradle 빌드 결과를 따로 봅니다. 최종 판단은 실제 Gradle 빌드입니다.”
-
-## 실행 시점
-
-Gradle Reload 후 Build → Build Project. DB 재실행은 아직 필수가 아니다.
-
-## 다음 단계 연결 멘트
-
-“반복 코드를 줄였으니 이제 Repository가 이미 제공하는 CRUD 도구를 확인하고, 직접 SQL 없이 생성과 조회를 연결해보겠습니다.”
+“반복 코드를 정리했으니 이제 2주차에 만든 Repository가 어떤 CRUD 메서드를 이미 제공하는지 확인하겠습니다.”
 
 ---
 
 # Part 2. JpaRepository와 CRUD
 
-예상 소요: 10분
+예상 소요: 8분
 
-## 화면과 코드
+### 자료 위치
 
-경로: `src/main/java/com/likelion/springsession/post/repository/PostRepository.java`
+- Part 2 시작: 원문 368줄
+- JpaRepository 코드와 CRUD 표: 원문 368~395줄
+- 「왜 직접 구현하지 않을까요?」: 원문 396~430줄
+
+### IntelliJ 이동
+
+`src/main/java/com/likelion/springsession/post/repository/PostRepository.java`
+
+### 화면에 보여줄 코드
 
 ```java
 package com.likelion.springsession.post.repository;
@@ -457,24 +472,13 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 }
 ```
 
-내가 말할 문장:
+### 내가 말할 문장
 
-“여기 메서드를 한 줄도 안 썼는데 save, findAll, findById, delete를 쓸 수 있습니다. Post는 이 Repository가 관리할 Entity이고 Long은 Post의 ID 타입입니다.”
+“메서드를 직접 만들지 않았지만 `JpaRepository<Post, Long>`을 상속해서 기본 CRUD 메서드를 사용할 수 있습니다. Post는 관리할 Entity이고 Long은 ID 타입입니다.”
 
-“save는 이름 때문에 무조건 INSERT라고 외우면 안 됩니다. Entity가 새것인지 기존 것인지에 따라 내부 동작이 달라지고, 오늘 새 Post는 ID가 없으니 INSERT됩니다.”
+“전반부에서는 생성의 `save()`, 조회의 `findAll()`과 `findById()`를 씁니다. 수정과 삭제는 후반부에서 이어갑니다.”
 
-“findById는 Post가 아니라 Optional<Post>를 돌려줍니다. 요청한 ID가 없을 수 있다는 사실을 타입으로 표현한 거예요.”
-
-## 표로 판서
-
-```text
-CREATE  save()
-READ    findAll(), findById()
-UPDATE  후반부: 영속 상태 Entity + 변경 감지
-DELETE  후반부: delete()
-```
-
-## 빈칸 질문
+### 멘티 질문
 
 ```java
 public interface PostRepository extends JpaRepository<____, ____> {
@@ -483,32 +487,37 @@ public interface PostRepository extends JpaRepository<____, ____> {
 
 정답: `Post`, `Long`
 
-“ID 하나로 찾는 메서드 이름은?”
-정답: `findById`
+### 흔한 오류
 
-## 자주 나는 오류
+- `JpaRepository` import는 `org.springframework.data.jpa.repository.JpaRepository`
+- Entity ID가 `Long`이므로 Repository 두 번째 타입도 `Long`
+- Repository 구현 클래스를 직접 만들 필요 없음
 
-- `JpaRepository` import가 다른 패키지: `org.springframework.data.jpa.repository.JpaRepository`
-- ID 타입을 `long` 또는 `Integer`로 잘못 적음: Entity의 `Long id`와 맞춘다.
-- 직접 구현 클래스를 만들려고 함: Spring Data JPA가 런타임 구현체를 제공한다.
+### 다음 내용 연결
 
-## 다음 단계 연결 멘트
-
-“Repository 준비는 이미 끝나 있었습니다. 이제 클라이언트가 보낸 제목과 내용을 받을 DTO부터 만들고 save를 호출해볼게요.”
+“이제 클라이언트가 보낸 제목과 본문을 받을 Request DTO를 만들고 실제로 `save()`를 호출하겠습니다.”
 
 ---
 
-# Part 3. CREATE
+# Part 3. CREATE — 게시글 생성
 
 예상 소요: 25분
 
 ## 3-1. PostCreateRequest
 
-클릭: `post/dto` 우클릭 → New → Java Class → `PostCreateRequest`
+### 자료 위치
+
+- Part 3 시작: 원문 431줄
+- 「PostCreateRequest 만들기」: 원문 433~445줄
+- 사진 6
+
+### IntelliJ 조작
+
+`post/dto` 우클릭 → New → Java Class → `PostCreateRequest`
 
 경로: `src/main/java/com/likelion/springsession/post/dto/PostCreateRequest.java`
 
-전체 코드:
+### 입력할 전체 코드
 
 ```java
 package com.likelion.springsession.post.dto;
@@ -525,28 +534,35 @@ import lombok.Setter;
 public class PostCreateRequest {
 
     @NotBlank(message = "제목은 필수입니다.")
-    @Size(max = 100, message = "제목은 100자 이하여야 합니다.")
+    @Size(max = 100, message = "제목은 100자 이하로 작성해주세요.")
     private String title;
 
-    @NotBlank(message = "내용은 필수입니다.")
-    @Size(max = 2000, message = "내용은 2000자 이하여야 합니다.")
+    @NotBlank(message = "본문은 필수입니다.")
+    @Size(max = 2000, message = "본문은 2000자 이하로 작성해주세요.")
     private String content;
 }
 ```
 
-내 멘트:
+### 내가 말할 문장
 
-“Spring Boot 4에서는 validation import가 javax가 아니라 jakarta로 시작합니다. 제목과 내용은 공백만 보내도 안 되도록 NotBlank, Entity 컬럼 길이를 넘기 전에 400으로 알려주도록 Size를 둡니다.”
+“생성 요청에서 받을 값은 제목과 본문입니다. Spring Boot 4에서는 Validation import가 `jakarta.validation`으로 시작합니다.”
 
-“이번 실습에서는 Jackson이 기본 생성자로 DTO를 만들고 Setter로 JSON 값을 채우는 단순한 방식을 선택합니다. Setter가 Jackson의 유일한 방식이라는 뜻은 아닙니다.”
+“`@NotBlank`는 null, 빈 문자열, 공백만 있는 문자열을 막고, `@Size`는 최대 길이를 검사합니다. 실제 검사는 잠시 뒤 Controller 매개변수에 `@Valid`를 붙였을 때 실행됩니다.”
 
-“Request DTO와 Entity를 나누면 클라이언트가 id나 createdAt을 마음대로 보내는 구조를 피할 수 있습니다.”
+“Request DTO에는 이번 실습 방식대로 Getter, Setter, 기본 생성자를 사용합니다.”
 
-## 3-2. Post 생성자
+## 3-2. Post 생성자 추가
 
-경로: `src/main/java/com/likelion/springsession/post/entity/Post.java`
+### 자료 위치
 
-필드 아래에 추가:
+- 「Post에 생성자 추가」: 원문 446~465줄
+- 사진 7
+
+### IntelliJ 이동
+
+`src/main/java/com/likelion/springsession/post/entity/Post.java`
+
+### 필드 아래에 추가
 
 ```java
 public Post(String title, String content) {
@@ -556,26 +572,30 @@ public Post(String title, String content) {
 }
 ```
 
-필요 import는 기존에 있는:
+### 내가 말할 문장
 
-```java
-import java.time.LocalDateTime;
-```
+“`@NoArgsConstructor`가 만든 생성자는 JPA가 사용하고, 지금 직접 만든 `Post(title, content)`는 새 게시글을 만들 때 사용합니다.”
 
-“Lombok이 만든 기본 생성자는 JPA용이고, 지금 직접 쓰는 생성자는 새 게시글을 만들기 위한 애플리케이션용입니다. 작성 시각은 서버가 여기서 결정하므로 저장 직후 응답에도 값이 들어갑니다.”
+“작성 시각은 요청으로 받지 않고 서버에서 `LocalDateTime.now()`로 만듭니다.”
 
-## 3-3. PostService 생성 로직
+## 3-3. Service 생성 기능과 응답 변환
 
-경로: `src/main/java/com/likelion/springsession/post/service/PostService.java`
+### 자료 위치
 
-추가 import:
+- 「Service에 게시글 생성 기능 추가」: 원문 466~471줄
+- 사진 8
+- 「Entity를 Response DTO로 변환하기」: 원문 472~496줄
+- 사진 8~9
+- 빈칸 문제: 원문 497~513줄
+
+### PostService 추가 import
 
 ```java
 import com.likelion.springsession.post.dto.PostCreateRequest;
 import com.likelion.springsession.post.dto.PostDetailResponse;
 ```
 
-클래스 내부에 추가:
+### 클래스 내부에 추가
 
 ```java
 public PostDetailResponse createPost(PostCreateRequest request) {
@@ -598,13 +618,15 @@ private PostDetailResponse toDetailResponse(Post post) {
 }
 ```
 
-내 멘트:
+### 내가 말할 문장
 
-“요청 DTO로 Entity를 만들고, save 결과를 다시 받습니다. ID는 저장 과정에서 생기므로 응답은 원래 post보다 savedPost를 기준으로 만드는 게 의도가 선명합니다.”
+“Request DTO에서 제목과 본문을 꺼내 Post를 만들고, Repository의 `save()`로 저장합니다.”
 
-“Entity를 그대로 반환하지 않고 상세 Response DTO로 바꾸는 코드는 생성과 상세 조회에서 같이 쓸 거라 메서드로 뺐습니다.”
+“저장된 Entity 자체를 Controller로 반환하지 않고 `PostDetailResponse`로 바꿉니다. 이 변환 메서드는 뒤의 상세 조회에서도 다시 사용할 겁니다.”
 
-빈칸:
+“저장 결과인 `savedPost`에는 DB가 생성한 ID가 들어 있으므로 응답에 ID도 포함됩니다. 작성 시각은 Post 생성자에서 이미 만들었습니다.”
+
+### 빈칸 질문
 
 ```java
 Post savedPost = postRepository._____(post);
@@ -612,11 +634,35 @@ Post savedPost = postRepository._____(post);
 
 정답: `save`
 
-## 3-4. PostController 공통 경로와 POST
+## 3-4. Controller에 POST 연결
 
-경로: `src/main/java/com/likelion/springsession/post/controller/PostController.java`
+### 자료 위치
 
-추가 import:
+- 「Controller에 생성 기능 연결」: 원문 514~552줄
+- 사진 10
+
+### 먼저 공통 경로 변경
+
+기존:
+
+```java
+@RestController
+public class PostController {
+
+    @GetMapping("/api/posts")
+```
+
+변경:
+
+```java
+@RestController
+@RequestMapping("/api/posts")
+public class PostController {
+
+    @GetMapping
+```
+
+### 추가 import
 
 ```java
 import com.likelion.springsession.post.dto.PostCreateRequest;
@@ -629,52 +675,53 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 ```
 
-클래스 위:
+### 사진 10 기준 Controller
 
 ```java
 @RestController
 @RequestMapping("/api/posts")
-@RequiredArgsConstructor
 public class PostController {
-```
 
-기존 목록 매핑 변경:
+    private final PostService postService;
 
-```java
-// 변경 전
-@GetMapping("/api/posts")
+    public PostController(PostService postService) {
+        this.postService = postService;
+    }
 
-// 변경 후
-@GetMapping
-```
+    @GetMapping
+    public List<PostSummaryResponse> getPosts() {
+        return postService.getPostSummaries();
+    }
 
-POST 추가:
-
-```java
-@PostMapping
-@ResponseStatus(HttpStatus.CREATED)
-public PostDetailResponse createPost(
-        @Valid @RequestBody PostCreateRequest request
-) {
-    return postService.createPost(request);
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public PostDetailResponse createPost(
+            @Valid @RequestBody PostCreateRequest request
+    ) {
+        return postService.createPost(request);
+    }
 }
 ```
 
-“클래스의 공통 경로와 메서드 경로는 합쳐집니다. 그래서 기존 GetMapping에 /api/posts를 남겨두면 /api/posts/api/posts가 되어버립니다. 반드시 기존 경로를 비웁니다.”
+### 내가 말할 문장
 
-“RequestBody가 JSON을 DTO로 바꾸고 Valid가 제약을 실행합니다. ResponseStatus로 생성 성공을 201로 명시합니다.”
+“게시글 API의 공통 주소 `/api/posts`를 클래스 위로 올립니다. 그다음 기존 `@GetMapping("/api/posts")`에서는 경로를 꼭 지워서 `@GetMapping`만 남깁니다.”
 
-## 실행 및 Postman
+“이걸 지우지 않으면 클래스 경로와 메서드 경로가 합쳐져 `/api/posts/api/posts`가 됩니다.”
 
-1. Build → Build Project
-2. 애플리케이션 실행
-3. 콘솔에서 Started 확인
-4. Postman → New HTTP Request
-5. POST, URL 입력
-6. Body → raw → JSON
+“`@RequestBody`가 JSON을 Request DTO로 변환하고, `@Valid`가 DTO의 검증 조건을 실행합니다. `@ResponseStatus(HttpStatus.CREATED)`로 생성 성공 상태를 201로 반환합니다.”
+
+## 3-5. Postman 생성 확인
+
+### 자료 위치
+
+- 「Postman으로 확인」: 원문 553~586줄
+
+### 요청
 
 ```http
 POST http://localhost:8080/api/posts
+Content-Type: application/json
 ```
 
 ```json
@@ -684,7 +731,7 @@ POST http://localhost:8080/api/posts
 }
 ```
 
-정상:
+### 정상 결과
 
 ```text
 201 Created
@@ -699,9 +746,9 @@ POST http://localhost:8080/api/posts
 }
 ```
 
-“ID와 시간은 제 화면과 달라도 정상입니다. title, content가 보낸 값과 같고 상태가 201인지 확인합니다. 조회를 위해 제목을 바꿔 두세 건 더 만들어주세요.”
+“ID와 시간은 사람마다 다를 수 있습니다. 상태가 201이고 제목과 본문이 보낸 값과 같은지 확인합니다. 목록 조회를 위해 제목을 바꿔 두세 개 더 만들어주세요.”
 
-Validation 실패 실습:
+### Validation 실패도 한 번 확인
 
 ```json
 {
@@ -712,42 +759,42 @@ Validation 실패 실습:
 
 예상: `400 Bad Request`
 
-## CREATE 오류 확인 순서
+### POST 오류 확인 순서
 
-1. HTTP method가 POST인지
-2. URL이 정확히 `/api/posts`인지
-3. Body raw JSON인지
-4. Content-Type application/json인지
-5. JSON 쉼표·따옴표 문법
-6. Controller에 `@RequestBody`
-7. `@Valid`와 Request DTO의 jakarta Validation import
-8. Request DTO 기본 생성자/Setter
-9. Service의 DTO 생성자 필드 순서
-10. 서버 로그의 첫 예외
+1. POST method
+2. URL `/api/posts`
+3. Body → raw → JSON
+4. Content-Type application/json
+5. JSON 쉼표와 따옴표
+6. `@RequestBody`
+7. `@Valid`
+8. Request DTO의 Getter/Setter/기본 생성자
+9. 서버 콘솔의 첫 번째 오류
 
-### DTO 생성자 오류
+### POST 성공 후 조회 결과가 다를 때
 
-“Response DTO 생성자가 없다고 나오면 네 필드가 final인지, RequiredArgsConstructor가 붙었는지, Gradle Reload가 됐는지 순서로 봅니다. Request DTO의 기본 생성자 오류라면 NoArgsConstructor를 확인합니다.”
+“POST 상태가 실제로 201이었는지, Hibernate INSERT 로그가 나왔는지, 앱을 다시 켜면서 `ddl-auto:create`로 데이터를 지우지 않았는지 확인합니다. POST와 GET이 같은 서버와 같은 DB를 보는지도 확인할게요.”
 
-### POST는 성공했는데 조회 결과가 다름
+### 다음 내용 연결
 
-“지금 POST 응답만 성공한 건지, 실제 DB에 INSERT가 됐는지 SQL 로그를 봅니다. 다음으로 앱이 재시작되며 create로 테이블을 지우지 않았는지, POST와 GET이 같은 서버와 같은 DB URL을 보는지 확인합니다.”
-
-## 다음 단계 연결 멘트
-
-“이제 DB에 데이터가 생겼습니다. 같은 Repository의 findAll과 findById로 목록과 상세를 나눠서 읽어보겠습니다.”
+“이제 우리가 직접 만든 데이터가 DB에 들어갔습니다. 같은 Repository로 목록과 상세를 조회해보겠습니다.”
 
 ---
 
-# Part 4. READ
+# Part 4. READ — 게시글 조회
 
-예상 소요: 24분
+예상 소요: 20분
 
 ## 4-1. 목록 조회
 
-경로: `src/main/java/com/likelion/springsession/post/service/PostService.java`
+### 자료 위치
 
-2주차 코드 확인:
+- Part 4 시작: 원문 587줄
+- 「게시글 목록 조회」: 원문 589~624줄
+- 「PostController에 목록 조회 연결」: 원문 625~640줄
+- 목록 Postman: 원문 701~724줄
+
+### PostService에서 확인할 기존 코드
 
 ```java
 public List<PostSummaryResponse> getPostSummaries() {
@@ -760,13 +807,15 @@ public List<PostSummaryResponse> getPostSummaries() {
                 post.getTitle(),
                 post.getCreatedAt()
         );
+
         responses.add(response);
     }
+
     return responses;
 }
 ```
 
-경로: `src/main/java/com/likelion/springsession/post/controller/PostController.java`
+### Controller
 
 ```java
 @GetMapping
@@ -775,19 +824,19 @@ public List<PostSummaryResponse> getPosts() {
 }
 ```
 
-내 멘트:
+### 내가 말할 문장
 
-“findAll 결과는 List<Post>입니다. API에는 Entity를 그대로 내보내지 않고 반복문으로 요약 DTO 목록을 만듭니다. 목록용 DTO라 content는 의도적으로 없습니다.”
+“`findAll()`은 모든 Post를 `List<Post>`로 가져옵니다. API에서는 Entity 목록을 그대로 반환하지 않고 반복문으로 `PostSummaryResponse` 목록을 만듭니다.”
 
-Postman:
+“목록용 DTO에는 content가 없기 때문에 응답에도 본문이 나오지 않는 것이 정상입니다.”
+
+### Postman
 
 ```http
 GET http://localhost:8080/api/posts
 ```
 
-Body 없음. 정상 상태 `200 OK`.
-
-예시:
+정상: `200 OK`
 
 ```json
 [
@@ -799,26 +848,27 @@ Body 없음. 정상 상태 `200 OK`.
 ]
 ```
 
-### 목록이 []로 나옴
+### 목록이 []일 때
 
-현장 멘트:
-
-“대괄호만 나온 건 서버 오류가 아니라 ‘현재 게시글 0개’라는 정상 200 응답입니다. POST 응답이 201이었는지, 앱 재시작으로 데이터가 사라졌는지, 같은 DB를 보고 있는지 확인할게요.”
+“빈 배열은 오류가 아니라 현재 연결된 DB에 게시글이 없다는 정상 200 응답입니다.”
 
 확인 순서:
 
-1. 상태가 200인지
-2. POST 201을 실제로 받았는지
-3. Hibernate INSERT 로그
-4. `ddl-auto`가 아직 create인지
-5. datasource URL/DB 이름
-6. DB에서 `SELECT * FROM posts;`
+1. POST가 201이었는지
+2. INSERT SQL이 출력됐는지
+3. `ddl-auto`가 update인지
+4. 같은 `likelion_blog` DB를 보는지
 
 ## 4-2. 상세 조회
 
-경로: `src/main/java/com/likelion/springsession/post/service/PostService.java`
+### 자료 위치
 
-추가:
+- 「게시글 하나 조회」: 원문 641~658줄
+- 「PostController에 상세 조회 연결」: 원문 659~675줄
+- 빈칸 문제: 원문 676~700줄
+- 상세 Postman: 원문 725~748줄
+
+### PostService에 추가
 
 ```java
 public PostDetailResponse getPost(Long postId) {
@@ -828,40 +878,11 @@ public PostDetailResponse getPost(Long postId) {
 
 private Post findPostById(Long postId) {
     return postRepository.findById(postId)
-            .orElseThrow(() -> new PostNotFoundException(postId));
+            .orElseThrow();
 }
 ```
 
-추가 import:
-
-```java
-import com.likelion.springsession.post.exception.PostNotFoundException;
-```
-
-예외 파일 생성:
-
-경로: `src/main/java/com/likelion/springsession/post/exception/PostNotFoundException.java`
-
-```java
-package com.likelion.springsession.post.exception;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
-
-@ResponseStatus(HttpStatus.NOT_FOUND)
-public class PostNotFoundException extends RuntimeException {
-
-    public PostNotFoundException(Long postId) {
-        super("게시글을 찾을 수 없습니다. id=" + postId);
-    }
-}
-```
-
-내 멘트:
-
-“findById는 값이 없을 수 있어서 Optional<Post>를 반환합니다. 원문처럼 인자 없는 orElseThrow만 쓰면 없는 ID가 자동으로 404가 되지 않고 처리되지 않은 NoSuchElementException 때문에 500이 됩니다. 그래서 작은 예외 클래스로 404를 명시하겠습니다.”
-
-Controller 추가:
+### Controller에 추가
 
 ```java
 @GetMapping("/{postId}")
@@ -876,19 +897,42 @@ public PostDetailResponse getPost(@PathVariable Long postId) {
 import org.springframework.web.bind.annotation.PathVariable;
 ```
 
-“중괄호 postId와 매개변수 postId 이름을 맞춥니다. 클래스 공통 경로와 합쳐져 GET /api/posts/{postId}가 됩니다.”
+### 내가 말할 문장
 
-Postman:
+“`findById()`는 게시글이 없을 수도 있으므로 `Optional<Post>`를 반환합니다. 오늘 자료에서는 가장 단순하게 `orElseThrow()`로 값이 없을 때 예외를 발생시킵니다.”
+
+“URL의 `{postId}`를 `@PathVariable`로 받아 Service에 전달합니다. 상세 응답에는 목록과 달리 content도 포함됩니다.”
+
+### 꼭 덧붙일 정확한 설명
+
+“현재처럼 인자 없는 `orElseThrow()`만 사용하면 없는 ID를 요청했을 때 자동으로 404가 되는 것은 아닙니다. 처리되지 않은 예외가 되어 500이 나올 수 있습니다. 오늘 CREATE/READ 핵심 실습에서는 실제 존재하는 ID를 사용하고, 404 응답을 다듬는 예외 처리는 이후 확장 내용으로 남기겠습니다.”
+
+이 설명은 코드를 추가로 바꾸지 않고 현재 동작을 정확히 알려주기 위한 것이다.
+
+### 빈칸 질문
+
+```java
+List<Post> posts = postRepository._____();
+```
+
+정답: `findAll`
+
+```java
+return postRepository._____(postId)
+        .orElseThrow();
+```
+
+정답: `findById`
+
+### Postman
 
 ```http
 GET http://localhost:8080/api/posts/1
 ```
 
-정상 예시:
+실제로 생성된 ID를 목록에서 확인해 사용한다.
 
-```text
-200 OK
-```
+정상: `200 OK`
 
 ```json
 {
@@ -899,195 +943,143 @@ GET http://localhost:8080/api/posts/1
 }
 ```
 
-없는 ID:
+### 상세 조회 오류 대응
 
-```http
-GET http://localhost:8080/api/posts/999999
+#### findById 타입 오류
+
+“`findById()`의 반환 타입은 Post가 아니라 `Optional<Post>`입니다. 바로 Post 변수에 넣지 말고 자료처럼 `orElseThrow()`까지 작성했는지 확인합니다.”
+
+#### URL이 /api/posts/api/posts가 됨
+
+“클래스의 `@RequestMapping("/api/posts")`와 메서드 경로는 합쳐집니다. 목록은 `@GetMapping`, 상세는 `@GetMapping("/{postId}")`만 적습니다.”
+
+#### 존재하지 않는 ID
+
+“ID가 꼭 1이라고 가정하지 말고 목록 응답에서 실제 ID를 복사합니다. 존재하지 않는 ID라면 현재 단순 예외 처리에서는 500이 날 수 있습니다.”
+
+#### 응답에 content가 없음
+
+“목록 URL이 아니라 `/api/posts/{실제 ID}`로 요청했는지, Service가 `PostDetailResponse`를 반환하는지 확인합니다.”
+
+#### 400·404·500 구분
+
+- 400: JSON 형식 오류 또는 Validation 실패
+- 404: 요청 URL 자체가 매핑되지 않음
+- 500: 현재 코드에서 없는 게시글처럼 처리되지 않은 서버 예외
+
+“없는 게시글을 404로 만들려면 별도 예외 매핑이 필요하지만 오늘 전반부 필수 구현에는 추가하지 않습니다.”
+
+## 4-3. 완성된 전반부 Service 확인
+
+### 자료 위치
+
+- 「Part 4-1. 여기까지 PostService」: 원문 749~823줄
+- 「자주 발생하는 오류」: 원문 824~835줄
+
+### 화면 진행
+
+자료의 전체 `PostService` 코드와 IntelliJ 파일을 나란히 두고 다음 메서드가 있는지 확인한다.
+
+```text
+getPostSummaries()
+getPost()
+createPost()
+findPostById()
+toDetailResponse()
 ```
 
-예상: `404 Not Found`
+### 내가 말할 문장
 
-## 빈칸 질문
+“여기까지 자료의 전체 Service와 우리 파일을 비교하겠습니다. 메서드 순서는 조금 달라도 괜찮지만 이름, 매개변수, 반환 타입이 같은지 확인해 주세요.”
 
-```java
-List<Post> posts = postRepository._____();
-```
+### 확인 순서
 
-정답: `findAll`
-
-```java
-return postRepository._____(postId)
-        .orElseThrow(...);
-```
-
-정답: `findById`
-
-“목록 응답과 상세 응답의 가장 눈에 띄는 필드 차이는?”
-정답: 상세에는 `content`가 있다.
-
-## READ 오류 대응
-
-### findById 타입 오류
-
-“Post post = repository.findById라고 바로 쓰면 타입이 안 맞습니다. 오른쪽은 Optional<Post>이기 때문이에요. orElseThrow로 값이 있는 경우 Post를 꺼내고 없는 경우를 따로 처리합니다.”
-
-### /api/posts/api/posts 중복
-
-“Controller 클래스의 RequestMapping과 메서드의 GetMapping을 눈으로 더해봅니다. 클래스에 /api/posts가 있으면 목록 메서드는 @GetMapping만 남겨야 합니다.”
-
-### 존재하지 않는 ID
-
-“먼저 목록에서 실제 ID를 복사했는지 확인합니다. update 설정에서는 ID가 꼭 1부터 시작하지 않습니다. 실제로 없는 ID라면 이 코드에서는 404가 정상입니다.”
-
-### 응답에 content가 없음
-
-“목록 GET인지 상세 GET인지 URL부터 봅니다. 상세 Service가 PostSummaryResponse가 아니라 PostDetailResponse를 반환하는지, toDetailResponse에서 content를 넣었는지 확인합니다.”
-
-### 400, 404, 500 구분 멘트
-
-“400은 JSON 문법이나 Validation처럼 요청이 조건을 못 맞춘 경우부터 봅니다. 404는 URL 매핑이 없거나 요청한 게시글 자체가 없는 경우입니다. 500은 서버 안에서 처리하지 못한 예외라 콘솔 로그의 첫 번째 원인을 확인해야 합니다.”
-
-확인 순서:
-
-1. HTTP 상태
-2. method와 URL
-3. 요청 JSON/Content-Type
-4. Controller 매핑
-5. 실제 DB ID
-6. 서버 콘솔의 첫 예외와 `Caused by`
-
-## 실행 시점
-
-상세 조회 코드를 저장한 뒤 애플리케이션을 재시작한다. 목록 → 실제 ID 확인 → 상세 → 없는 ID 순서로 요청한다.
-
-## 다음 단계 연결 멘트
-
-“전반부에서 새 Entity를 save로 저장했고, findAll과 findById로 읽었습니다. 이제 조회한 Entity의 값을 바꾸면 JPA가 어떻게 UPDATE를 만드는지가 다음 질문입니다.”
+1. DTO import
+2. `@Service`, `@RequiredArgsConstructor`
+3. `final PostRepository`
+4. 목록 조회
+5. 상세 조회
+6. 생성
+7. 공통 조회 메서드
+8. 상세 DTO 변환 메서드
 
 ---
 
 # 전반부 정리
 
-예상 소요: 7분
+예상 소요: 5분
 
-## 화면
+### 자료 위치
 
-IntelliJ에서 다음 파일을 차례로 Ctrl+클릭해 짧게 훑는다.
+- 「전반부 정리 및 복습」: 원문 836~874줄
+- 「다음 파트」: 원문 875~890줄
 
-1. `build.gradle`
-2. `post/entity/Post.java`
-3. `post/dto/PostCreateRequest.java`
-4. `post/dto/PostSummaryResponse.java`
-5. `post/dto/PostDetailResponse.java`
-6. `post/service/PostService.java`
-7. `post/controller/PostController.java`
+### 내가 말할 문장
 
-## 내가 말할 문장
-
-“오늘 전반부의 흐름은 JSON이 PostCreateRequest가 되고, Service가 Post를 만든 뒤 Repository.save로 저장하고, 다시 Response DTO로 바꿔 반환하는 것이었습니다.”
+“전반부에서 사용한 JpaRepository 메서드는 세 개입니다. 생성은 `save()`, 전체 조회는 `findAll()`, 하나 조회는 `findById()`입니다.”
 
 ```text
-POST JSON
-→ PostCreateRequest
-→ Post
-→ postRepository.save()
-→ PostDetailResponse
-→ 201 Created
+CREATE → save()
+READ 전체 → findAll()
+READ 하나 → findById()
 ```
 
-“조회에서는 findAll의 List<Post>를 목록 DTO들로 바꿨고, findById의 Optional은 없는 경우를 404로 처리했습니다.”
+“Lombok으로 Getter, JPA 기본 생성자, final 필드 생성자, Service 생성자를 줄였습니다. 모든 클래스에 같은 Lombok을 붙인 것이 아니라 역할에 맞춰 다르게 사용했습니다.”
 
-```text
-GET /api/posts          → List<PostSummaryResponse>
-GET /api/posts/{id}     → PostDetailResponse 또는 404
-```
+“API는 POST `/api/posts`, GET `/api/posts`, GET `/api/posts/{postId}`까지 완성했습니다.”
 
-“Validation의 400과 DB 컬럼의 nullable=false는 같은 역할이 아닙니다. 전자는 HTTP 요청 입구에서 친절하게 막고, 후자는 DB 무결성의 마지막 제약입니다.”
+### 최종 질문
 
-## 최종 질문
+1. “`findById()`가 Optional을 반환하는 이유는 무엇인가요?”
+2. “목록 DTO와 상세 DTO에서 다른 필드는 무엇인가요?”
+3. “POST 성공을 201로 만든 어노테이션은 무엇인가요?”
+4. “Entity에 Setter를 붙이지 않은 이유는 무엇인가요?”
+5. “Validation을 실행하게 하는 Controller 어노테이션은 무엇인가요?”
 
-1. “Entity에 전체 Setter를 붙이지 않은 이유는?”
-   기대 답: 아무 곳에서나 상태를 바꾸지 않고 의미 있는 변경 메서드로 관리하기 위해서.
-2. “findById가 Optional인 이유는?”
-   기대 답: 해당 ID가 없을 가능성을 타입으로 표현하기 위해서.
-3. “POST가 201을 반환하게 한 어노테이션은?”
-   기대 답: `@ResponseStatus(HttpStatus.CREATED)`
-4. “목록과 상세 DTO를 나눈 이유는?”
-   기대 답: API 목적에 필요한 필드만 반환하고 Entity와 API 계약을 분리하기 위해서.
-5. “Request DTO 검증을 실제로 실행시키는 Controller 어노테이션은?”
-   기대 답: `@Valid`
+### 기대 답
+
+1. 해당 ID의 게시글이 없을 수 있어서
+2. 상세 DTO에는 content가 있음
+3. `@ResponseStatus(HttpStatus.CREATED)`
+4. 아무 곳에서나 Entity 상태를 바꾸지 않기 위해
+5. `@Valid`
 
 ---
 
-# 후반부 강사에게 넘기는 연결 멘트
+# 후반부 강사 연결 멘트
 
-“여기까지는 새 Post를 save해서 영속화하고, findAll과 findById로 조회했습니다. 그런데 수정에서는 이미 조회한 Post의 제목과 본문을 바꾼 뒤 save를 다시 호출하지 않을 예정입니다.”
+### 자료 위치
 
-“어떻게 JPA가 값이 바뀐 걸 알고 UPDATE를 보낼까요? 그리고 조회부터 수정까지를 왜 하나의 작업으로 묶어야 할까요? 이 질문을 풀려면 영속성 컨텍스트, 스냅샷, flush와 commit, 그리고 @Transactional이 필요합니다.”
+- 「다음 파트」: 원문 875~890줄
+- 후반부 시작: 원문 891줄
 
-“이제 후반부에서 조회한 Entity가 영속 상태일 때 변경 감지가 어떻게 동작하는지 살펴보고, 그 원리로 PUT과 DELETE까지 완성하겠습니다. 선우 멘토님께 넘기겠습니다.”
+### 그대로 읽을 멘트
+
+“여기까지 새 Post는 `save()`로 저장했고, `findAll()`과 `findById()`로 조회했습니다.”
+
+“이제 후반부에서는 방금 `findById()`로 조회한 Post의 제목과 본문을 바꿔볼 건데요. 수정할 때는 `save()`를 다시 호출하지 않아도 UPDATE가 실행됩니다.”
+
+“JPA가 어떻게 변경을 알아차리는지 이해하려면 영속성 컨텍스트, 변경 감지, flush와 commit, 그리고 `@Transactional`을 알아야 합니다. 이 원리를 먼저 살펴본 다음 PUT과 DELETE까지 완성하겠습니다. 이제 후반부 멘토님께 넘기겠습니다.”
 
 ---
 
-# 강사용 비상 점검표
+# 강의 직전 3분 체크리스트
 
-## Lombok
+1. 사진 2의 고정 비밀번호를 “본인의 MySQL 비밀번호”로 수정했는가?
+2. IntelliJ Run Configuration에 실제 `DB_PASSWORD`를 넣었는가?
+3. MySQL이 실행 중인가?
+4. `application.yaml`의 DB 이름이 `likelion_blog`인가?
+5. `ddl-auto:update`인가?
+6. `import.sql`을 제거했는가?
+7. Gradle Reload를 했는가?
+8. 애플리케이션이 Started 상태인가?
+9. Postman JSON의 Content-Type이 application/json인가?
+10. 상세 조회에는 목록에서 확인한 실제 ID를 사용하는가?
 
-1. Gradle 의존성 위치
-2. Gradle Reload
-3. JDK/Gradle JVM 17
-4. annotation processing
-5. Lombok 플러그인
-6. 실제 `gradlew.bat compileJava` 결과
+## 최종 Postman 순서
 
-## DB
-
-1. MySQL 프로세스
-2. URL과 3306
-3. DB `likelion_blog`
-4. 사용자 `likelion`
-5. `DB_PASSWORD`
-6. 계정 host 권한
-7. `ddl-auto:update`
-8. 남아 있는 `import.sql`과 기존 DB 행 구분
-
-## API
-
-1. 앱 Started 로그
-2. method
-3. 전체 URL
-4. Content-Type
-5. JSON 문법
-6. Controller 경로 중복
-7. `@RequestBody`와 `@Valid`
-8. 실제 ID
-9. DTO 종류와 필드
-10. 서버 로그의 최초 원인
-
-## 강의 직전 자동 확인
-
-```powershell
-.\gradlew.bat clean build
-```
-
-실제 MySQL:
-
-```powershell
-$env:DB_PASSWORD='실습 DB 비밀번호'
-.\gradlew.bat bootRun
-```
-
-Postman 순서:
-
-1. 잘못된 POST → 400
-2. 정상 POST → 201, 생성된 ID 기록
-3. 목록 GET → 200, content 없음
-4. 상세 GET → 200, content 있음
-5. 없는 ID GET → 404
-
-후반부 담당자와 공유할 확인 사항:
-
-- 생성된 실제 ID
-- `ddl-auto:update` 적용 여부
-- `Post.update()`, `PostUpdateRequest`는 후반부 시작 시 추가할지 최종 코드에서 미리 보여줄지
-- PUT 200, DELETE 204, 없는 ID 404 규격
+1. 정상 POST → 201
+2. 빈 제목 POST → 400
+3. 목록 GET → 200
+4. 실제 ID 상세 GET → 200, content 확인
+5. 없는 ID 요청은 현재 자료 코드에서 500 가능성이 있음을 설명

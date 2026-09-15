@@ -19,7 +19,7 @@
 | 수정 | PUT | `/api/posts/{postId}` | 200 OK |
 | 삭제 | DELETE | `/api/posts/{postId}` | 204 No Content |
 
-잘못된 요청값은 400, 존재하지 않는 게시글은 404를 반환한다.
+잘못된 요청값은 400을 반환한다. 원본 자료처럼 인자 없는 `orElseThrow()`를 사용하는 현재 수업 코드는 존재하지 않는 게시글에서 500이 발생할 수 있다. 404 예외 응답 설계는 이번 필수 실습에 추가하지 않는다.
 
 ---
 
@@ -120,9 +120,9 @@ testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 | Entity | `@Getter`, protected `@NoArgsConstructor` | 조회용 Getter와 JPA 기본 생성자 |
 | Response DTO | `@Getter`, `@RequiredArgsConstructor` | JSON 직렬화 Getter와 final 필드 생성자 |
 | Request DTO | `@Getter`, `@Setter`, `@NoArgsConstructor` | 이번 실습의 JavaBean 역직렬화 방식 |
-| Service/Controller | `@RequiredArgsConstructor` | final 의존성 생성자 주입 |
+| Service | `@RequiredArgsConstructor` | final 의존성 생성자 주입 |
 
-`@RequiredArgsConstructor`는 초기화되지 않은 final 필드와 `@NonNull` 필드를 받는 생성자를 만든다. 이번 코드에서는 final 필드가 대상이다.
+`@RequiredArgsConstructor`는 초기화되지 않은 final 필드와 `@NonNull` 필드를 받는 생성자를 만든다. 이번 코드에서는 final 필드가 대상이다. Controller는 사진 10과 같이 기존 직접 생성자를 유지한다.
 
 ## Post Entity 전체 코드
 
@@ -272,11 +272,11 @@ import lombok.Setter;
 public class PostCreateRequest {
 
     @NotBlank(message = "제목은 필수입니다.")
-    @Size(max = 100, message = "제목은 100자 이하여야 합니다.")
+    @Size(max = 100, message = "제목은 100자 이하로 작성해주세요.")
     private String title;
 
-    @NotBlank(message = "내용은 필수입니다.")
-    @Size(max = 2000, message = "내용은 2000자 이하여야 합니다.")
+    @NotBlank(message = "본문은 필수입니다.")
+    @Size(max = 2000, message = "본문은 2000자 이하로 작성해주세요.")
     private String content;
 }
 ```
@@ -372,7 +372,7 @@ GET http://localhost:8080/api/posts
 
 게시글이 없으면 200과 `[]`가 정상이다. 있으면 content가 없는 요약 배열을 반환한다.
 
-## 상세 조회와 404
+## 상세 조회
 
 ```java
 public PostDetailResponse getPost(Long postId) {
@@ -381,7 +381,7 @@ public PostDetailResponse getPost(Long postId) {
 
 private Post findPostById(Long postId) {
     return postRepository.findById(postId)
-            .orElseThrow(() -> new PostNotFoundException(postId));
+            .orElseThrow();
 }
 ```
 
@@ -392,30 +392,13 @@ public PostDetailResponse getPost(@PathVariable Long postId) {
 }
 ```
 
-`Optional<Post>`는 값의 부재 가능성을 타입으로 드러낸다. 인자 없는 `orElseThrow()`만 쓰면 기본적으로 500이므로 아래 최소 예외로 404를 명시한다.
-
-`src/main/java/com/likelion/springsession/post/exception/PostNotFoundException.java`
-
-```java
-package com.likelion.springsession.post.exception;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
-
-@ResponseStatus(HttpStatus.NOT_FOUND)
-public class PostNotFoundException extends RuntimeException {
-
-    public PostNotFoundException(Long postId) {
-        super("게시글을 찾을 수 없습니다. id=" + postId);
-    }
-}
-```
+`Optional<Post>`는 값의 부재 가능성을 타입으로 드러낸다. 이번 자료는 가장 단순한 `orElseThrow()`를 사용한다. 존재하지 않는 ID에서는 처리되지 않은 예외로 500이 발생할 수 있으며, 404 응답을 위한 예외 매핑은 후속 개선 범위다.
 
 ```http
 GET http://localhost:8080/api/posts/1
 ```
 
-존재하면 content를 포함한 200, 없으면 404다.
+존재하면 content를 포함한 200을 반환한다. 실습에서는 목록에서 확인한 실제 ID를 사용한다.
 
 ---
 
@@ -461,11 +444,11 @@ import lombok.Setter;
 public class PostUpdateRequest {
 
     @NotBlank(message = "제목은 필수입니다.")
-    @Size(max = 100, message = "제목은 100자 이하여야 합니다.")
+    @Size(max = 100, message = "제목은 100자 이하로 작성해주세요.")
     private String title;
 
-    @NotBlank(message = "내용은 필수입니다.")
-    @Size(max = 2000, message = "내용은 2000자 이하여야 합니다.")
+    @NotBlank(message = "본문은 필수입니다.")
+    @Size(max = 2000, message = "본문은 2000자 이하로 작성해주세요.")
     private String content;
 }
 ```
@@ -487,7 +470,7 @@ public void deletePost(Long postId) {
 }
 ```
 
-수정에서는 조회한 Entity가 같은 트랜잭션 안에서 영속 상태이므로 JPA 관점에서 `save()`를 다시 부르지 않아도 변경 감지로 반영된다. 삭제에서는 “없는 ID면 404” 조회와 삭제를 하나의 Service 트랜잭션으로 묶는다.
+수정에서는 조회한 Entity가 같은 트랜잭션 안에서 영속 상태이므로 JPA 관점에서 `save()`를 다시 부르지 않아도 변경 감지로 반영된다. 삭제에서는 대상 조회와 삭제를 하나의 Service 트랜잭션으로 묶는다.
 
 ## Controller 수정·삭제
 
@@ -543,7 +526,6 @@ import com.likelion.springsession.post.dto.PostDetailResponse;
 import com.likelion.springsession.post.dto.PostSummaryResponse;
 import com.likelion.springsession.post.dto.PostUpdateRequest;
 import com.likelion.springsession.post.entity.Post;
-import com.likelion.springsession.post.exception.PostNotFoundException;
 import com.likelion.springsession.post.repository.PostRepository;
 import java.util.ArrayList;
 import java.util.List;
@@ -596,7 +578,7 @@ public class PostService {
 
     private Post findPostById(Long postId) {
         return postRepository.findById(postId)
-                .orElseThrow(() -> new PostNotFoundException(postId));
+                .orElseThrow();
     }
 
     private PostDetailResponse toDetailResponse(Post post) {
@@ -622,7 +604,6 @@ import com.likelion.springsession.post.dto.PostUpdateRequest;
 import com.likelion.springsession.post.service.PostService;
 import jakarta.validation.Valid;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -636,10 +617,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/posts")
-@RequiredArgsConstructor
 public class PostController {
 
     private final PostService postService;
+
+    public PostController(PostService postService) {
+        this.postService = postService;
+    }
 
     @GetMapping
     public List<PostSummaryResponse> getPosts() {
@@ -688,7 +672,8 @@ public class PostController {
 | URL 404 | 클래스/메서드 경로를 합쳐 확인; 중복 `/api/posts/api/posts` 금지 |
 | 상세에 content 없음 | `PostDetailResponse` 사용 여부 |
 | 400 | JSON 문법, Content-Type, `@Valid`, `@NotBlank`, `@Size` |
-| 404 | URL 매핑 또는 실제 게시글 ID; 이 코드에서는 없는 게시글도 404 |
+| 404 | 요청 URL 자체가 Controller에 매핑되지 않음 |
+| 없는 ID의 500 | 현재 단순 `orElseThrow()` 동작; 목록에서 실제 ID 사용 |
 | 500 | 서버 로그의 첫 원인 예외; DB, 처리되지 않은 예외, 코드 오류 |
 
 # 자동 테스트
