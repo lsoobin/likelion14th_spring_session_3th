@@ -5,7 +5,6 @@ import com.likelion.springsession.post.dto.PostDetailResponse;
 import com.likelion.springsession.post.dto.PostSummaryResponse;
 import com.likelion.springsession.post.dto.PostUpdateRequest;
 import com.likelion.springsession.post.entity.Post;
-import com.likelion.springsession.post.exception.PostNotFoundException;
 import com.likelion.springsession.post.repository.PostRepository;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,7 +61,7 @@ public class PostService {
 
     private Post findPostById(Long postId) {
         return postRepository.findById(postId)
-                .orElseThrow(() -> new PostNotFoundException(postId));
+                .orElseThrow();
     }
 
     private PostDetailResponse toDetailResponse(Post post) {

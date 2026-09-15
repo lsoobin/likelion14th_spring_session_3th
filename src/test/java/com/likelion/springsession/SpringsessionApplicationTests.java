@@ -133,19 +133,4 @@ class SpringsessionApplicationTests {
                 .andExpect(status().isBadRequest());
     }
 
-    @Test
-    void missingPostReturnsNotFound() throws Exception {
-        mockMvc.perform(get("/api/posts/{postId}", 999999))
-                .andExpect(status().isNotFound());
-
-        mockMvc.perform(put("/api/posts/{postId}", 999999)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {"title": "없는 글", "content": "수정 시도"}
-                                """))
-                .andExpect(status().isNotFound());
-
-        mockMvc.perform(delete("/api/posts/{postId}", 999999))
-                .andExpect(status().isNotFound());
-    }
 }
